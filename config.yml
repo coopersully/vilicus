@@ -1,0 +1,13 @@
+#                 __        __
+#  \  / | |    | /  ` |  | /__`
+#   \/  | |___ | \__, \__/ .__/
+#
+# Vilicus is a server-management tool for Minecraft: Java Edition.
+# Author: Cooper Sullivan (https://github.com/coopersully/vilicus)
+
+# Should we automatically check for & install API updates?
+update_api: true
+
+# Should we automatically organize your plugins directory by
+# renaming all plugins to match the scheme: "NAME-VERSION.jar"?
+update_plugin_names: true

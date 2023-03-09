@@ -1,0 +1,29 @@
+plugins {
+    id 'com.github.johnrengelman.shadow' version '7.1.1'
+    id 'java'
+}
+
+group 'me.coopersully.vilicus'
+version ''
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.0'
+    implementation 'org.jetbrains:annotations:23.0.0'
+    implementation 'org.jsoup:jsoup:1.15.3'
+    implementation 'org.yaml:snakeyaml:2.0'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'me.coopersully.vilicus.Vilicus'
+    }
+}

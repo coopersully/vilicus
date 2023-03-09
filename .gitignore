@@ -1,0 +1,9 @@
+# JetBrains associated
+.idea/
+build/
+
+# Gradle associated
+.gradle/
+gradle/
+gradlew
+gradlew.bat
