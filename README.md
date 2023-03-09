@@ -2,7 +2,7 @@
 Vilicus, named after the Latin word for "steward," is a server management tool designed for Minecraft Java Edition servers designed
 to make server management as streamlined as possible. Once installed, run the program and follow the prompts to set up your server.
 
-> Although it may work on other distributions, the tool is primarily developed to run on Ubuntu Server. Some features,
+> Although it may work on other distributions, the tool is primarily developed to run on Ubuntu Server 22.10. Some features,
 such as ones that include file management, may not work properly on other distros.
 
 ## Features
