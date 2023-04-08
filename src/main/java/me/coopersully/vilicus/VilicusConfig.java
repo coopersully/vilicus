@@ -1,14 +1,20 @@
 package me.coopersully.vilicus;
 
-import java.io.*;
-import java.util.Map;
+import org.yaml.snakeyaml.Yaml;
 
-import org.yaml.snakeyaml.*;
-import org.yaml.snakeyaml.constructor.Constructor;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 public class VilicusConfig {
     private boolean updateApi;
     private boolean updatePluginNames;
+    private int initialHeapSize;
+    private int maximumHeapSize;
+    private String[] additionalFlags;
+
 
     public VilicusConfig() {
         File configFile = new File("vilicus/config.yml");
@@ -29,8 +35,22 @@ public class VilicusConfig {
             Yaml yaml = new Yaml();
             InputStream inputStream = new FileInputStream(configFile);
             Map<String, Object> yamlData = yaml.load(inputStream);
+            System.out.println(yamlData);
             this.updateApi = (Boolean) yamlData.get("update_api");
             this.updatePluginNames = (Boolean) yamlData.get("update_plugin_names");
+
+            // Load on_launch settings
+            Map<String, Object> onLaunchData = (Map<String, Object>) yamlData.get("on_launch");
+
+            // Load heap settings
+            Map<String, Object> heapData = (Map<String, Object>) onLaunchData.get("heap");
+            this.initialHeapSize = (Integer) heapData.get("initial");
+            this.maximumHeapSize = (Integer) heapData.get("maximum");
+
+            // Load additional flags
+            List<String> flagsList = (List<String>) onLaunchData.get("flags");
+            this.additionalFlags = flagsList.toArray(new String[0]);
+
             inputStream.close();
         } catch (IOException e) {
             System.out.println("Failed to load config file");
@@ -63,4 +83,31 @@ public class VilicusConfig {
     public boolean shouldUpdatePluginNames() {
         return updatePluginNames;
     }
+
+    public String getInitialHeapSize() {
+        return initialHeapSize + "M";
+    }
+
+    public String getMaximumHeapSize() {
+        return maximumHeapSize + "M";
+    }
+
+    public String[] getAdditionalFlags() {
+        return additionalFlags;
+    }
+
+    public List<String> getAllFlags(String fileName) {
+        List<String> flagsList = new ArrayList<>();
+        flagsList.add("java");
+        flagsList.add("-Xms" + getInitialHeapSize());
+        flagsList.add("-Xmx" + getMaximumHeapSize());
+
+        Collections.addAll(flagsList, getAdditionalFlags());
+
+        flagsList.add("-jar");
+        flagsList.add(fileName);
+        return flagsList;
+    }
+
+
 }

@@ -22,7 +22,7 @@ import java.util.List;
 public class ServerUpdater {
 
     private static final String SERVER_DOWNLOADS_URL = "https://purpurmc.org/downloads?v=";
-    private static final String DEFAULT_FILE_NAME = "server.jar";
+    public static final String DEFAULT_FILE_NAME = "server.jar";
     private static final String HISTORY_FILE_NAME = "vilicus/.server_api_version";
 
     public static void updateAPI(String[] args) throws Exception {
