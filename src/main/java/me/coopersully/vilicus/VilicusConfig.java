@@ -15,65 +15,53 @@ public class VilicusConfig {
     private int maximumHeapSize;
     private String[] additionalFlags;
 
-
     public VilicusConfig() {
         File configFile = new File("vilicus/config.yml");
+        createConfigFileIfNotExists(configFile);
+        loadConfig(configFile);
+    }
 
+    private void createConfigFileIfNotExists(File configFile) {
         if (!configFile.exists()) {
-            // If the config file doesn't exist, create it with default values
             try {
                 configFile.createNewFile();
                 copyConfigFile(configFile);
             } catch (IOException e) {
-                System.out.println("Failed to create config file");
+                System.out.println("Failed to create config file.");
                 e.printStackTrace();
             }
         }
+    }
 
-        // Load the config file into memory
-        try {
+    private void loadConfig(File configFile) {
+        try (InputStream inputStream = new FileInputStream(configFile)) {
             Yaml yaml = new Yaml();
-            InputStream inputStream = new FileInputStream(configFile);
             Map<String, Object> yamlData = yaml.load(inputStream);
-            System.out.println(yamlData);
-            this.updateApi = (Boolean) yamlData.get("update_api");
-            this.updatePluginNames = (Boolean) yamlData.get("update_plugin_names");
+            updateApi = (Boolean) yamlData.get("update_api");
+            updatePluginNames = (Boolean) yamlData.get("update_plugin_names");
 
-            // Load on_launch settings
             Map<String, Object> onLaunchData = (Map<String, Object>) yamlData.get("on_launch");
-
-            // Load heap settings
             Map<String, Object> heapData = (Map<String, Object>) onLaunchData.get("heap");
-            this.initialHeapSize = (Integer) heapData.get("initial");
-            this.maximumHeapSize = (Integer) heapData.get("maximum");
+            initialHeapSize = (Integer) heapData.get("initial");
+            maximumHeapSize = (Integer) heapData.get("maximum");
 
-            // Load additional flags
             List<String> flagsList = (List<String>) onLaunchData.get("flags");
-            this.additionalFlags = flagsList.toArray(new String[0]);
-
-            inputStream.close();
+            additionalFlags = flagsList.toArray(new String[0]);
         } catch (IOException e) {
-            System.out.println("Failed to load config file");
+            System.out.println("Failed to load config file.");
             e.printStackTrace();
         }
     }
 
-
     private void copyConfigFile(File targetFile) throws IOException {
-        // Get the reference file's InputStream from the jar
-        InputStream inputStream = getClass().getResourceAsStream("/config.yml");
-
-        // Write the reference file's InputStream to the target file's OutputStream
-        OutputStream outputStream = new FileOutputStream(targetFile);
-        byte[] buffer = new byte[1024];
-        int length;
-        while ((length = inputStream.read(buffer)) > 0) {
-            outputStream.write(buffer, 0, length);
+        try (InputStream inputStream = getClass().getResourceAsStream("/config.yml");
+             OutputStream outputStream = new FileOutputStream(targetFile)) {
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = inputStream.read(buffer)) > 0) {
+                outputStream.write(buffer, 0, length);
+            }
         }
-
-        // Close the streams
-        inputStream.close();
-        outputStream.close();
     }
 
     public boolean shouldUpdateApi() {
@@ -101,13 +89,10 @@ public class VilicusConfig {
         flagsList.add("java");
         flagsList.add("-Xms" + getInitialHeapSize());
         flagsList.add("-Xmx" + getMaximumHeapSize());
-
         Collections.addAll(flagsList, getAdditionalFlags());
-
         flagsList.add("-jar");
         flagsList.add(fileName);
+        flagsList.add("nogui");
         return flagsList;
     }
-
-
 }
