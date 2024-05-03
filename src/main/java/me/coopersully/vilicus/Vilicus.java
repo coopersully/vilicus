@@ -9,6 +9,8 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import static me.coopersully.vilicus.EulaAgreementManager.ensureEulaAgreement;
+
 public class Vilicus {
     public static void main(String[] args) {
         // Print ASCII art header for the application
@@ -56,6 +58,7 @@ public class Vilicus {
         }
 
         // Start the Minecraft server with specified configurations
+        ensureEulaAgreement();
         runServer(serverFileName, config);
     }
 
