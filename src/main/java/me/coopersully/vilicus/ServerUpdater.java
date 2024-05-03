@@ -17,27 +17,25 @@ public class ServerUpdater {
     private static final String HISTORY_FILE_NAME = "vilicus/.server_api_version.yml";
 
     public static void updateAPI(String[] args) throws Exception {
+        VilicusConfig config = new VilicusConfig();
         String currentVersion = getCurrentVersion();
+
+        String targetVersion = config.getPreferredVersion().equals("latest") ? getLatestVersion() : config.getPreferredVersion();
+
         System.out.println("Current server version: " + (currentVersion != null ? currentVersion : "UNKNOWN"));
+        System.out.println("Target server version: " + (targetVersion != null ? targetVersion : "UNKNOWN"));
 
-        String latestVersion = getLatestVersion();
-        if (latestVersion == null) {
-            System.out.println("Failed to fetch the latest server version.");
+        if (targetVersion == null || targetVersion.equals(currentVersion)) {
+            System.out.println("Server is up-to-date or failed to fetch target version.");
             return;
         }
 
-        System.out.println("Latest server version: " + latestVersion);
-        if (latestVersion.equals(currentVersion)) {
-            System.out.println("Server is up-to-date with version " + latestVersion);
-            return;
-        }
-
-        // Download and install the latest version
-        System.out.println("Updating server to version " + latestVersion + "...");
+        // Download and install the target version
+        System.out.println("Updating server to version " + targetVersion + "...");
         File file = getFilePath(args.length > 0 ? args[0] : DEFAULT_FILE_NAME);
-        saveURLtoFile(new URL(API_BASE_URL + latestVersion + "/latest/download"), file);
+        saveURLtoFile(new URL(API_BASE_URL + targetVersion + "/latest/download"), file);
 
-        updateVersionHistory(latestVersion);
+        updateVersionHistory(targetVersion);
     }
 
     // Fetch the latest version from the API
@@ -83,7 +81,6 @@ public class ServerUpdater {
                     return (String) data.get("version");
                 }
             } catch (IOException e) {
-                // If reading the history file fails, assume corrupt or outdated and regenerate it
                 System.err.println("Error reading history file, regenerating: " + e.getMessage());
                 updateServerToLatest();
             }

@@ -57,6 +57,8 @@ public class Vilicus {
             PluginRenamer.renamePlugins();
         }
 
+        LogManager.manageLogs(config);
+
         // Start the Minecraft server with specified configurations
         ensureEulaAgreement();
         runServer(serverFileName, config);

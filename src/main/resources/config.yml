@@ -12,30 +12,29 @@
 # Vilicus is a server-management tool for Minecraft: Java Edition.
 # Author: Cooper Sullivan (https://github.com/coopersully/vilicus)
 
-# Should we automatically check for & install API updates?
-update_api: true
+# Server API Update Settings
+server_api:
+  # Enable automatic checking and installation of server API updates.
+  auto_update: true
+  # Specify the server version to use: set a specific version (e.g., "1.20.4") or "latest" for continuous updates.
+  preferred_version: "latest"
 
-# Should we automatically organize your plugins directory by
-# renaming all plugins to match the scheme: "NAME-VERSION.jar"?
+# Plugin Management
 update_plugin_names: true
+# Enable automatic organization of your plugins directory. This renames all plugins to the format "NAME-VERSION.jar".
 
-# All settings relating to how the server is launched
+# Server Launch Settings
 on_launch:
-
-  # Memory heap settings
+  # Memory Management Settings
   heap:
-    # The initial heap size (in MB)
+    # Initial heap size in megabytes. Determines the starting memory allocation pool.
     initial: 5012
-    # The maximum heap size (in MB)
+    # Maximum heap size in megabytes. Limits the memory allocation pool's growth.
     maximum: 5012
 
-  # Add any additional flags for the startup script here!
-  # All flags listed here will be inserted in order, directly before "-jar"
-  # We recommend using Aikar's Flags for optimal results;
-  # see more: https://docs.papermc.io/paper/aikars-flags
+  # Java Virtual Machine (JVM) flags for the server startup script.
   flags:
-    # - "-Xms5G" Already accounted for; modify in "heap" settings above!
-    # - "-Xmx5G" Already accounted for; modify in "heap" settings above!
+    # Predefined flags are set based on the heap settings. Additional flags can be specified below.
     - "-Dterminal.jline=false"
     - "-Dterminal.ansi=true"
     - "-XX:+UseG1GC"
@@ -59,3 +58,10 @@ on_launch:
     - "-Dusing.aikars.flags=https://mcflags.emc.gs"
     - "-Daikars.new.flags=true"
     - "--add-modules=jdk.incubator.vector"
+
+# Log File Management
+log_management:
+  enable_auto_delete: true
+  # Enable automatic deletion of log files older than a specified number of days.
+  retention_days: 60
+  # Number of days to retain log files before they are automatically deleted.

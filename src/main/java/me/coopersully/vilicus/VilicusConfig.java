@@ -10,10 +10,13 @@ import java.util.Map;
 
 public class VilicusConfig {
     private boolean updateApi;
+    private String preferredVersion;
     private boolean updatePluginNames;
     private int initialHeapSize;
     private int maximumHeapSize;
     private String[] additionalFlags;
+    private boolean enableAutoDelete;
+    private int retentionDays;
 
     public VilicusConfig() {
         File configFile = new File("vilicus/config.yml");
@@ -37,7 +40,11 @@ public class VilicusConfig {
         try (InputStream inputStream = new FileInputStream(configFile)) {
             Yaml yaml = new Yaml();
             Map<String, Object> yamlData = yaml.load(inputStream);
-            updateApi = (Boolean) yamlData.get("update_api");
+
+            Map<String, Object> serverApi = (Map<String, Object>) yamlData.get("server_api");
+            updateApi = (Boolean) serverApi.get("auto_update");
+            preferredVersion = (String) serverApi.get("preferred_version");
+
             updatePluginNames = (Boolean) yamlData.get("update_plugin_names");
 
             Map<String, Object> onLaunchData = (Map<String, Object>) yamlData.get("on_launch");
@@ -47,6 +54,11 @@ public class VilicusConfig {
 
             List<String> flagsList = (List<String>) onLaunchData.get("flags");
             additionalFlags = flagsList.toArray(new String[0]);
+
+            // Load log management settings
+            Map<String, Object> logManagementData = (Map<String, Object>) yamlData.get("log_management");
+            enableAutoDelete = (Boolean) logManagementData.get("enable_auto_delete");
+            retentionDays = (Integer) logManagementData.get("retention_days");
         } catch (IOException e) {
             System.out.println("Failed to load config file.");
             e.printStackTrace();
@@ -66,6 +78,10 @@ public class VilicusConfig {
 
     public boolean shouldUpdateApi() {
         return updateApi;
+    }
+
+    public String getPreferredVersion() {
+        return preferredVersion;
     }
 
     public boolean shouldUpdatePluginNames() {
@@ -94,5 +110,13 @@ public class VilicusConfig {
         flagsList.add(fileName);
         flagsList.add("nogui");
         return flagsList;
+    }
+
+    public boolean isAutoDeleteEnabled() {
+        return enableAutoDelete;
+    }
+
+    public int getRetentionDays() {
+        return retentionDays;
     }
 }
