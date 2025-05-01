@@ -33,8 +33,7 @@ public class Vilicus {
         try {
             Files.createDirectories(configDirectory);
         } catch (IOException e) {
-            System.err.println("Failed to create directories.");
-            e.printStackTrace();
+            Logging.severe("Failed to create directories.", e);
         }
 
         VilicusConfig config = new VilicusConfig();
@@ -43,22 +42,21 @@ public class Vilicus {
 
         // Check and perform updates if necessary
         if (config.shouldUpdateApi()) {
-            System.out.println("Attempting to update server API...");
+            Logging.info("Attempting to update server API...");
             try {
                 ServerUpdater.updateAPI(args);
             } catch (Exception e) {
-                System.err.println("Failed to update server API.");
-                e.printStackTrace();
+                Logging.severe("Failed to update server API.", e);
             }
         }
 
         if (config.shouldUpdatePluginNames()) {
-            System.out.println("Attempting to organize plugin structure...");
+            Logging.info("Attempting to organize plugin structure...");
             PluginRenamer.renamePlugins();
         }
 
         if (config.shouldForceUnlockSessions()) {
-            System.out.println("Attempting to unlock world sessions...");
+            Logging.info("Attempting to unlock world sessions...");
             SessionUnlocker.unlockSessions();
         }
 
@@ -75,15 +73,14 @@ public class Vilicus {
         processBuilder.redirectError(ProcessBuilder.Redirect.INHERIT);
 
         try {
-            System.out.println("Starting server...");
+            Logging.info("Starting server...");
             Process process = processBuilder.start();
             // Forward console input to the server process
             forwardInputToProcess(process);
             // Wait for the server process to complete
             process.waitFor();
         } catch (IOException | InterruptedException e) {
-            System.err.println("Failed to start the server.");
-            e.printStackTrace();
+            Logging.severe("Failed to start the server.", e);
         }
     }
 
@@ -98,8 +95,7 @@ public class Vilicus {
                     processInput.flush();
                 }
             } catch (IOException e) {
-                System.err.println("Failed to forward input.");
-                e.printStackTrace();
+                Logging.severe("Failed to forward input.", e);
             }
         });
 

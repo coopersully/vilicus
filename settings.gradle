@@ -1,2 +1,6 @@
-rootProject.name = 'Vilicus'
+rootProject.name = 'vilicus'
+
+gradle.beforeSettings { settings ->
+    settings.jvmargs = ['-Xmx2g', '-XX:MaxMetaspaceSize=512m']
+}
 

@@ -22,16 +22,16 @@ public class ServerUpdater {
 
         String targetVersion = config.getPreferredVersion().equals("latest") ? getLatestVersion() : config.getPreferredVersion();
 
-        System.out.println("Current server version: " + (currentVersion != null ? currentVersion : "UNKNOWN"));
-        System.out.println("Target server version: " + (targetVersion != null ? targetVersion : "UNKNOWN"));
+        Logging.info("Current server version: " + (currentVersion != null ? currentVersion : "UNKNOWN"));
+        Logging.info("Target server version: " + (targetVersion != null ? targetVersion : "UNKNOWN"));
 
         if (targetVersion == null || targetVersion.equals(currentVersion)) {
-            System.out.println("Server is up-to-date or failed to fetch target version.");
+            Logging.info("Server is up-to-date or failed to fetch target version.");
             return;
         }
 
         // Download and install the target version
-        System.out.println("Updating server to version " + targetVersion + "...");
+        Logging.info("Updating server to version " + targetVersion + "...");
         File file = getFilePath(args.length > 0 ? args[0] : DEFAULT_FILE_NAME);
         saveURLtoFile(new URL(API_BASE_URL + targetVersion + "/latest/download"), file);
 
@@ -41,10 +41,12 @@ public class ServerUpdater {
     // Fetch the latest version from the API
     private static String getLatestVersion() throws IOException {
         URL url = new URL(API_BASE_URL);
-        try (InputStream input = url.openStream()) {
+        try (InputStream input = url.openStream();
+             InputStreamReader reader = new InputStreamReader(input)) {
             Yaml yaml = new Yaml();
-            Map<String, Object> data = yaml.load(input);
+            Map<String, Object> data = yaml.loadAs(reader, Map.class);
             if (data != null && data.containsKey("versions")) {
+                @SuppressWarnings("unchecked")
                 List<String> versions = (List<String>) data.get("versions");
                 if (!versions.isEmpty()) {
                     return versions.get(versions.size() - 1); // Return the last item, the latest version
@@ -75,13 +77,14 @@ public class ServerUpdater {
         File file = getFilePath(HISTORY_FILE_NAME);
         if (file.exists()) {
             Yaml yaml = new Yaml();
-            try (FileInputStream fis = new FileInputStream(file)) {
-                Map<String, Object> data = yaml.load(fis);
+            try (FileInputStream fis = new FileInputStream(file);
+                 InputStreamReader reader = new InputStreamReader(fis)) {
+                Map<String, Object> data = yaml.loadAs(reader, Map.class);
                 if (data != null) {
                     return (String) data.get("version");
                 }
             } catch (IOException e) {
-                System.err.println("Error reading history file, regenerating: " + e.getMessage());
+                Logging.warning("Error reading history file, regenerating: " + e.getMessage());
                 updateServerToLatest();
             }
         }
@@ -98,7 +101,7 @@ public class ServerUpdater {
                 updateVersionHistory(latestVersion);
             }
         } catch (Exception e) {
-            System.err.println("Failed to force update server: " + e.getMessage());
+            Logging.severe("Failed to force update server", e);
         }
     }
 

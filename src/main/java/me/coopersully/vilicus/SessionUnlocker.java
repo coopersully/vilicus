@@ -24,7 +24,7 @@ public class SessionUnlocker {
         List<File> worldDirectories = findWorldDirectories(serverDirectory);
 
         if (worldDirectories.isEmpty()) {
-            System.out.println("No world directories found.");
+            Logging.info("No world directories found.");
             return;
         }
 
@@ -33,9 +33,9 @@ public class SessionUnlocker {
             if (Files.exists(sessionLockPath)) {
                 try {
                     Files.delete(sessionLockPath);
-                    System.out.println("Deleted session lock in " + worldDir.getName());
+                    Logging.info("Deleted session lock in " + worldDir.getName());
                 } catch (IOException e) {
-                    System.err.println("Failed to delete session lock in " + worldDir.getName() + ": " + e.getMessage());
+                    Logging.severe("Failed to delete session lock in " + worldDir.getName(), e);
                 }
             }
         }

@@ -28,48 +28,101 @@ public class VilicusConfig {
     private void createConfigFileIfNotExists(File configFile) {
         if (!configFile.exists()) {
             try {
-                configFile.createNewFile();
+                File parent = configFile.getParentFile();
+                if (parent != null && !parent.exists()) {
+                    parent.mkdirs();
+                }
                 copyConfigFile(configFile);
             } catch (IOException e) {
-                System.out.println("Failed to create config file.");
-                e.printStackTrace();
+                Logging.severe("Failed to create config file", e);
             }
         }
     }
 
     private void loadConfig(File configFile) {
-        try (InputStream inputStream = new FileInputStream(configFile)) {
+        try (InputStream inputStream = new FileInputStream(configFile);
+             InputStreamReader reader = new InputStreamReader(inputStream)) {
             Yaml yaml = new Yaml();
-            Map<String, Object> yamlData = yaml.load(inputStream);
+            @SuppressWarnings("unchecked")
+            Map<String, Object> yamlData = yaml.loadAs(reader, Map.class);
+            if (yamlData == null) {
+                throw new IOException("Failed to parse config file - empty or invalid YAML");
+            }
 
-            Map<String, Object> serverApi = (Map<String, Object>) yamlData.get("server_api");
-            updateApi = (Boolean) serverApi.get("auto_update");
-            preferredVersion = (String) serverApi.get("preferred_version");
+            @SuppressWarnings("unchecked")
+            Map<String, Object> serverApi = getMapSafely(yamlData, "server_api");
+            updateApi = getBooleanSafely(serverApi, "auto_update", false);
+            preferredVersion = getStringSafely(serverApi, "preferred_version", "latest");
 
-            updatePluginNames = (Boolean) yamlData.get("update_plugin_names");
+            updatePluginNames = getBooleanSafely(yamlData, "update_plugin_names", false);
 
-            Map<String, Object> onLaunchData = (Map<String, Object>) yamlData.get("on_launch");
-            Map<String, Object> heapData = (Map<String, Object>) onLaunchData.get("heap");
-            initialHeapSize = (Integer) heapData.get("initial");
-            maximumHeapSize = (Integer) heapData.get("maximum");
-            forceUnlockSessions = (Boolean) onLaunchData.get("force_unlock_sessions");
+            @SuppressWarnings("unchecked")
+            Map<String, Object> onLaunchData = getMapSafely(yamlData, "on_launch");
+            @SuppressWarnings("unchecked")
+            Map<String, Object> heapData = getMapSafely(onLaunchData, "heap");
+            initialHeapSize = getIntegerSafely(heapData, "initial", 1024);
+            maximumHeapSize = getIntegerSafely(heapData, "maximum", 2048);
+            forceUnlockSessions = getBooleanSafely(onLaunchData, "force_unlock_sessions", false);
 
-            List<String> flagsList = (List<String>) onLaunchData.get("flags");
+            @SuppressWarnings("unchecked")
+            List<String> flagsList = getListSafely(onLaunchData, "flags");
             additionalFlags = flagsList.toArray(new String[0]);
 
-            // Load log management settings
-            Map<String, Object> logManagementData = (Map<String, Object>) yamlData.get("log_management");
-            enableAutoDelete = (Boolean) logManagementData.get("enable_auto_delete");
-            retentionDays = (Integer) logManagementData.get("retention_days");
+            @SuppressWarnings("unchecked")
+            Map<String, Object> logManagementData = getMapSafely(yamlData, "log_management");
+            enableAutoDelete = getBooleanSafely(logManagementData, "enable_auto_delete", false);
+            retentionDays = getIntegerSafely(logManagementData, "retention_days", 7);
         } catch (IOException e) {
-            System.out.println("Failed to load config file.");
-            e.printStackTrace();
+            Logging.severe("Failed to load config file", e);
         }
+    }
+
+    private Map<String, Object> getMapSafely(Map<String, Object> source, String key) {
+        Object value = source.get(key);
+        if (value instanceof Map) {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> result = (Map<String, Object>) value;
+            return result;
+        }
+        return Collections.emptyMap();
+    }
+
+    private List<String> getListSafely(Map<String, Object> source, String key) {
+        Object value = source.get(key);
+        if (value instanceof List) {
+            @SuppressWarnings("unchecked")
+            List<String> result = (List<String>) value;
+            return result;
+        }
+        return Collections.emptyList();
+    }
+
+    private String getStringSafely(Map<String, Object> source, String key, String defaultValue) {
+        Object value = source.get(key);
+        return value instanceof String ? (String) value : defaultValue;
+    }
+
+    private boolean getBooleanSafely(Map<String, Object> source, String key, boolean defaultValue) {
+        Object value = source.get(key);
+        return value instanceof Boolean ? (Boolean) value : defaultValue;
+    }
+
+    private int getIntegerSafely(Map<String, Object> source, String key, int defaultValue) {
+        Object value = source.get(key);
+        if (value instanceof Integer) {
+            return (Integer) value;
+        } else if (value instanceof Number) {
+            return ((Number) value).intValue();
+        }
+        return defaultValue;
     }
 
     private void copyConfigFile(File targetFile) throws IOException {
         try (InputStream inputStream = getClass().getResourceAsStream("/config.yml");
              OutputStream outputStream = new FileOutputStream(targetFile)) {
+            if (inputStream == null) {
+                throw new IOException("Default config resource not found");
+            }
             byte[] buffer = new byte[1024];
             int length;
             while ((length = inputStream.read(buffer)) > 0) {
@@ -99,7 +152,7 @@ public class VilicusConfig {
     }
 
     public String[] getAdditionalFlags() {
-        return additionalFlags;
+        return additionalFlags.clone();
     }
 
     public boolean shouldForceUnlockSessions() {

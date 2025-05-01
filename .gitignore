@@ -10,3 +10,6 @@ gradlew.bat
 
 # Binary files
 bin/
+
+# Test run files
+test-run/
