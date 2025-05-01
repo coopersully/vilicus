@@ -7,3 +7,6 @@ build/
 gradle/
 gradlew
 gradlew.bat
+
+# Binary files
+bin/

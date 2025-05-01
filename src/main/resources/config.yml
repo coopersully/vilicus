@@ -32,6 +32,10 @@ on_launch:
     # Maximum heap size in megabytes. Limits the memory allocation pool's growth.
     maximum: 5012
 
+  # Force unlock all world sessions on startup
+  force_unlock_sessions: false
+  # If true, will attempt to delete all session.lock files in world directories before starting the server.
+
   # Java Virtual Machine (JVM) flags for the server startup script.
   flags:
     # Predefined flags are set based on the heap settings. Additional flags can be specified below.

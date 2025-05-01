@@ -57,6 +57,11 @@ public class Vilicus {
             PluginRenamer.renamePlugins();
         }
 
+        if (config.shouldForceUnlockSessions()) {
+            System.out.println("Attempting to unlock world sessions...");
+            SessionUnlocker.unlockSessions();
+        }
+
         LogManager.manageLogs(config);
 
         // Start the Minecraft server with specified configurations

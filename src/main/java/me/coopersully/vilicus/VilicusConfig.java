@@ -17,6 +17,7 @@ public class VilicusConfig {
     private String[] additionalFlags;
     private boolean enableAutoDelete;
     private int retentionDays;
+    private boolean forceUnlockSessions;
 
     public VilicusConfig() {
         File configFile = new File("vilicus/config.yml");
@@ -51,6 +52,7 @@ public class VilicusConfig {
             Map<String, Object> heapData = (Map<String, Object>) onLaunchData.get("heap");
             initialHeapSize = (Integer) heapData.get("initial");
             maximumHeapSize = (Integer) heapData.get("maximum");
+            forceUnlockSessions = (Boolean) onLaunchData.get("force_unlock_sessions");
 
             List<String> flagsList = (List<String>) onLaunchData.get("flags");
             additionalFlags = flagsList.toArray(new String[0]);
@@ -98,6 +100,10 @@ public class VilicusConfig {
 
     public String[] getAdditionalFlags() {
         return additionalFlags;
+    }
+
+    public boolean shouldForceUnlockSessions() {
+        return forceUnlockSessions;
     }
 
     public List<String> getAllFlags(String fileName) {

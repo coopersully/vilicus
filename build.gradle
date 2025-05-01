@@ -6,6 +6,11 @@ plugins {
 group 'me.coopersully.vilicus'
 version ''
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_15
+    targetCompatibility = JavaVersion.VERSION_15
+}
+
 repositories {
     mavenCentral()
 }
